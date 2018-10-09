@@ -50,7 +50,7 @@ def twitter_streaming(request):
 					"code":"1","status":"failed",
 					"message":"Some error occured"
 				}
-		return render(request,'error.html',context)
+		return render(request,'error_page.html',context)
 	return render(request,'search.html')
 	
 
@@ -91,18 +91,16 @@ def storeData(data, keyword):
 		user_keys = ['id','screen_name', 'name', 'location', 'followers_count']
 		user_test = users.find_one({'id':data['user']['id']})
 		if user_test == None:
-			for key in user_keys:
-				user_details = {key: data['user'][key] }
+			user_details = {key: data['user'][key] for key in user_keys}
 			user_details["name_lower"] = data['user']['name'].lower()
 			user_details["screen_name_lower"] = data['user']['screen_name'].lower()
+			user_details['favourites_count'] = data['user']['favourites_count']
 			if data['user']['location']:
 				user_details["location_lower"] = data['user']['location'].lower()
 			users.insert(user_details)
-
 		data['user'] = data['user']['id']
 		data_keys = ['favorite_count', 'id', 'is_quote_status', 'lang', 'retweet_count','user']
-		for key in data_keys:
-			tweet_detail = {key: data[key] }
+		tweet_detail = {key: data[key] for key in data_keys}
 
 		if data['truncated'] and 'extended_tweet' in data and 'full_text' in data['extended_tweet']:
 			tweet_detail['text'] = data['extended_tweet']['full_text']
@@ -118,170 +116,99 @@ def storeData(data, keyword):
 			tweet_detail['user_mentions'] = x['screen_name']
 			tweet_detail['user_mentions_lower'] = x['screen_name'].lower()
 		tweet_detail['keyword'] = keyword.lower()
-
 		tweet_detail['is_retweet'] = False
 		if 'retweeted_status' in data:
 			tweet_detail['is_retweet'] = True
 
 		tweets.insert(tweet_detail)
+
+# API-2 Filtering and soting data 
+def search_data(request):
+	name = request.POST.get('name')
+	text = request.POST.get('text')
+	location = request.POST.get('location')
+	language = request.	POST.get('language')
+	retweet_count = request.POST.get('rtcount')
+	follower = request.POST.get('followers')
+	startdate = request.POST.get('startdate')
+	enddate = request.POST.get('enddate')
+	tweet_favcount = request.POST.get('favcount')
+	sortField = request.POST.get('sortField')
+   	order = request.POST.get('order')
+	# check_export = request. POST.get('checked')
+
+	print retweet_count
+	result = []
+	users = db.users
+	tweets = db.tweets
+	if (name != "" ):
+		print 'a'
+		sd = users.find({'name_lower':{'$regex' : str(name.lower())}})
+		for i in sd:
+			ed = tweets.find_one({'user':int(i['id'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
 	
+	if (text != "" ):
+		print 'b'
+		sd = tweets.find({'text_lower' :{'$regex' : str(text.lower())}})
+		for i in sd:
+			ed = users.find_one({'id':long(i['user'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+		
+	if (location != "" ):
+		print 'c'
+		sd = users.find({'location_lower':{'$regex' : str(location.lower())}})
+		for i in sd:
+			ed = tweets.find_one({'user':long(i['id'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+	
+	if (language != ""):
+		print 'd'
+		sd = tweets.find({'lang' :{'$regex' : str(language.lower())}})
+		for i in sd:
+			ed = users.find_one({'id':long(i['user'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+			
 
-# def searchdate(request):
-#     if request.method == 'POST' :
-#         filterValue1 = request.POST.get('filterValue1')
-#         filterValue2 = request.POST.get('filterValue2')
-#         filterValue3 = request.POST.get('filterValue3')
-#         textFilterType = request.POST.get('textFilterType')
-#         numFilterType = request.POST.get('numFilterType')
-#         sortField = request.POST.get('sortField')
-#         order = request.POST.get('order')
-#         check_export = request. POST.get('checked')
-#         text_field1 = request.POST.get('Search')
-#         text_field2 = request.POST.get('Search1')
-#         text_field3 = request.POST.get('Search2')
-        
-#     results = []
-#     tweetdb = db.tweeet
-#     if (text_field1 != "" and (filterValue1 == 'name' or filterValue1 == 'ttxt' or filterValue1 == 'user_mentions' or filterValue1 == 'sname')):
-#         print 'enter1'
-#         results = filter_by_text(filterValue1,text_field1,textFilterType)
+	if (retweet_count != ""):
+		print 'e'
+		sd = tweets.find({'retweet_count' :{'$regex' : int(retweet_count)}})
+		for i in sd:
+			ed = users.find_one({'id':long(i['user'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+
+	if (follower != "" ):
+		print 'f'
+		sd = users.find({'followers_count':{'$regex' : int(follower)}})
+		for i in sd:
+			ed = tweets.find_one({'user':long(i['id'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+
+	if (tweet_favcount != ""):
+		print 'g'
+		sd = users.find({'favourites_count' :{'$regex' : int(tweet_favcount)}})
+		for i in sd:
+			ed = tweets.find_one({'user':long(i['id'])})
+			z = merge_two_dicts(i,ed)
+			result.append(z)
+	
+    # sorting 
+	if (order == 'Ascending'):
+		newresults = sorted(result, key=itemgetter(sortField), reverse=True)
+	else:
+		newresults = sorted(result, key=itemgetter(sortField), reverse=False)
     
-#     if ((filterValue2 == 'favcount' or filterValue2 == 'rtcount' or filterValue2 == 'start_date' or filterValue2 == 'end_date' or filterValue1 == 'followers') and text_field2 != ""):
-#         results = filter_range(text_field2,numFilterType)
+	print newresults
+	return render(request,'home_page.html')
 
-#     # if (filterValue2 == 'start_date' or filterValue2 == 'end_date'):
-#     #     if (text_field2 != None and len(text_field2)==10):
-#     #         text_field2 = text_field2.translate(None,'-')
-#     #         date_time = str(datetime.datetime.strptime(text_field2 , '%Y%m%d'))
-#     #         # if only or date+time
-#     #         date = date_time.split(' ')
-#     #         if(numFilterType == 'gt'):
-#     #             results = tweetdb.find({'created_at':{'$gt': date[0]}})
-#     #         elif (numFilterType == 'lt'):
-#     #             results = tweetdb.find({'created_at': {'$lt' : date[0]}})
-#     #         elif(numFilterType == 'none' or numFilterType == 'eq'):
-#     #             results = tweetdb.find({'created_at': date[0]})
-
-#     #         elif (numFilterType == 'gte'):
-#     #             results = tweetdb.find({'created_at':{'$gte': date[0]}})
-#     #         else:
-#     #             results = tweetdb.find({'created_at': {'$lte' : date[0]}})
-       
-#     if(filterValue3 == 'location' and text_field3 != ""):
-#         results = list(tweetdb.find({'location': str(text_field3) }))
-
-#     if(filterValue3 == 'language' and text_field3 != ""):
-#         results = tweetdb.find({'language': text_field3.lower() })	
-				
-
-#     sorting 
-#     if (order == 'Ascending'):
-#         newresults = sorted(results, key=itemgetter(sortField), reverse=False)
-#     else:
-#         newresults = sorted(results, key=itemgetter(sortField), reverse=True)
-#     print results
-
-#     if(check_export == 'on'):
-#         with open('output.csv', 'wb') as csvfile:
-#             spamwriter = csv.writer(csvfile , lineterminator='\n')
-#             spamwriter.writerow(['uid', 'user', 'tweet','retweet_count','fav_count','followers','created_at','language','location'])
-#             for i in results:  
-#                 spamwriter.writerow([int(i['uid']),int(i['user']),int(i['ttxt']),int(i['rtcount']),int(i['favcount']),int(i['followers']),int(i['created_at']),int(i['language']),int(i['location'])])
-
-#     # context ={
-#         # 'results': newresults, 
-#         # 'results_count': count, 
-# 		# 'page': page, 										
-#         # 'next_page':next_page, shikha
-# 		# 'last_page':last_page
-#     # }
-                 
-    
-#     return render(request,'result.html')
-
-
-
-# def filter_by_text(filterValue1,text_field1,textFilterType):
-#     tweetdb = db.tweet
-#     results = []
-#     ids= list(db.tweet.find({'name' : 'shikha'}))
-#     print ids
-#     if (filterValue1 == 'name'):
-#         if(textFilterType == 'em'):
-#             print 'entera'
-#             results = list(tweetdb.find({'name' : text_field1}))
-#         elif (textFilterType == 'sw'):
-#             print 'enterb'
-#             results = list(tweetdb.find({'name' : {'$regex' : "^"+ text_field1 }}))
-#         elif(textFilterType == 'ew'): 
-#             print 'enterc'
-#             results = list(tweetdb.find({'name' : {'$regex' : text_field1 +"$"}}))
-#         else : 
-#             print 'enterd'
-#             results = list(tweetdb.find_one({'name' : {'$regex' : text_field1 }}))
-        
-#     if (filterValue1 == 'ttxt'):
-#         if(textFilterType == 'em'):
-#             results = list(tweetdb.find({'ttxt' : text_field1}))
-#         elif(textFilterType == 'sw'):
-#             results = list(tweetdb.find({'ttxt' : {'$regex' : "^"+ text_field1 }}))
-#         elif (textFilterType == 'ew'): 
-#             results = list(tweetdb.find({'ttxt' : {'$regex' : text_field1 +"$"}}))
-#         else : 
-#             results = list(tweetdb.find({'ttxt' : {'$regex' : text_field1 }}))
-
-#     if (filterValue1 == 'user_mentions'):
-#         if(textFilterType == 'em'):
-#             results = list(tweetdb.find({'user_mentions' : text_field1}))
-#         elif (textFilterType == 'sw'):
-#             results = list(tweetdb.find({'user_mentions' : {'$regex' : "^"+ text_field1 }}))
-#         elif (textFilterType == 'ew'): 
-#             results = list(tweetdb.find({'user_mentions' : {'$regex': text_field1 +"$"}}))
-#         else : 
-#             results = list(tweetdb.find({'user_mentions' : {'$regex' : text_field1 }}))
-#     print results
-#     return results
-
-# def filter_range(text_field2,numFilterType):
-#     tweetdb = db.tweet
-#     results = []
-#     if(text_field2 != None):
-#         if (numFilterType == 'gt'):
-#             if (favcount != None):
-#                 results = tweetdb.find({'favcount': {'$gt':int(text_field2)}})
-#             if(rtcount != None):
-#                 results = tweetdb.find({'rtcount': {'$gt':int(text_field2)}})
-#             if(followers != None):
-#                 results = tweetdb.find({'followers': {'$gt':int(text_field2)}})
-#         elif (numFilterType == 'lt'):
-#             if (favcount != None):
-#                 results = tweetdb.find({'favcount': {'$lt':int(text_field2)}})
-#             if(rtcount != None):
-#                 results = tweetdb.find({'rtcount': {'$lt':int(text_field2)}})
-#             if(followers != None):
-#                 results = tweetdb.find({'followers': {'$lt':int(text_field2)}})
-#         elif (numFilterType == 'eq' or numFilterType == 'none'):
-#             if (favcount != None):
-#                 results = tweetdb.find({'favcount': int(text_field2)})
-#             if(rtcount != None):
-#                 results = tweetdb.find({'rtcount': int(text_field2)})
-#             if(followers != None):
-#                 results = tweetdb.find({'followers': int(text_field2)})
-#         elif (numFilterType == 'ge'):
-#             if (favcount != None):
-#                 results = tweetdb.find({'favcount': {'$gte':int(text_field2)}})
-#             if(rtcount != None):
-#                 results = tweetdb.find({'rtcount': {'$gte':int(text_field2)}})
-#             if(followers != None):
-#                 results = tweetdb.find({'followers': {'$gte':int(text_field2)}})
-#         elif (numFilterType == 'le'):
-#             if (favcount != None):
-#                 results = tweetdb.find({'favcount': {'$lte':int(text_field2)}})
-#             if(rtcount != None):
-#                 results = tweetdb.find({'rtcount': {'$lte':int(text_field2)}})
-#             if(followers != None):
-#                 results = tweetdb.find({'followers': {'$lte':int(text_field2)}})
-#         if (results == None):
-#             error_page()
-#     return results
-
+def merge_two_dicts(x, y):
+	z = x.copy()
+	z.update(y)
+	return z
+	

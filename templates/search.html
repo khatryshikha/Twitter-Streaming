@@ -1,73 +1,51 @@
 {% extends "base.html" %} {% block content %}
 {{ "Filter Tweet by: " }}
 <br>
-<form action="search" method='post'>{% csrf_token %}
-    <select name="filterValue1" class="btn btn-dark"'>
-        <option value="name">User_Name</option>
-        <option value="ttxt">Tweet_text</option>
-        <option value="user_mentions">User_Mentions</option>
-    </select>
-    <select name="textFilterType" class="btn btn-dark"'>
-        <option value="sw">Start with</option>
-        <option value="ew">End with</option>
-        <option value="ct">Contains</option>
-        <option value="em">Exact match</option>
-    </select>
+<form action="filter" method='post'>{% csrf_token %}
+    <input class="form-control input-sm" id="name" name='name' type="text" placeholder="Type Name"> <br>
+    <input class="form-control input-sm" id="text" name='text' type="text" placeholder="Type for text"> <br>
+    <input class="form-control input-sm" id="location" name='location' type="text" placeholder="Type for location"> <br>
+    <input class="form-control input-sm" id="language" name='language' type="text" placeholder="Type for language"> <br>
+    <input class="form-control input-sm" id="rtcount" name='rtcount' type="text" placeholder="Type for retweet_count">
     <br>
-    <input class="form-control input-sm" id="Search" name='Search' type="text" placeholder="Type for Search">
+    <input class="form-control input-sm" id="followers" name='followers' type="text" placeholder="Type for follower"> <br>
+    <input class="form-control input-sm" id="startdate" name='startdate' type="text" placeholder="Type for startdate">
     <br>
-    <select name="filterValue2" class="btn btn-dark"'>
-        <option value="followers">Follower</option>
-        <option value="favcount">Favorite_count</option>
-        <option value="rtcount">Retweet_Count</option>
-        <option value="start_date">Start_date</option>
-        <option value="end_date">End_date</option>
-    </select>
-    <select name="numFilterType" class="btn btn-dark"'>
-        <option value="none">None</option>
-        <option value="gt">greater than</option>
-        <option value="lt">less than</option>
-        <option value="eq">equal to</option>
-        <option value="ge">greater than or equal to</option>
-        <option value="le">less than or equal to</option>numFilterType == 'eq'
-    </select>
-    <input type="text"  id="Search1" name='Search1' class="form-control input-sm" placeholder="Type for Search ( For date : yyyy-mm-dd)">
+    <input class="form-control input-sm" id="enddate" name='enddate' type="text" placeholder="Type for enddate"> <br>
+    <input class="form-control input-sm" id="favcount" name='favcount' type="text" placeholder="Type for tweet_favcount">
     <br>
-    <select name="filterValue3" class="btn btn-dark"'>
-        <option value="location">Location</option>
-        <option value="language">Language</option>
-    </select>
-    <input type="text" id="Search2" name='Search2' class="form-control input-sm" placeholder="Type for Search">
-    <br><br>
-    {{ 'Sort Data by: ' }}
+    <br>
+  {{ 'Sort Data by: ' }}
     <br>
     <select name="order" class="btn btn-dark"'>
         <option value="as">Ascending order</option>
         <option value="dc">Descending order</option>
     </select>
     <select name="sortField" class="btn btn-dark"'>
-        <option value="name">User_Name</option>
-        <option value="ttxt">Tweet_text</option>
-        <option value="followers">Follower</option>
-        <option value="favcount">Favorite_count</option>
-        <option value="rtcount">Retweet_Count</option>
-        <option value="date">Date</option>
+        <option value="name_lower">name</option>
+        <option value="text_lower">text</option>
+        <option value="location_lower">location</option>
+        <option value="retweet_count">retweet_count</option>
+        <option value="created_at">created_at</option>
+        <option value="followers_count ">followers_count</option>
+        <option value="favourites_count ">favourites_count</option>
+        favourites_count
     </select>
     <br>
-    <br><br>
-    {{ 'Want CSV Export : '}}
-    <br>
-    <!-- Default unchecked -->
+    <br><br> 
+    <!-- {{ 'Want CSV Export : '}} -->
+    <br>  
+    <!-- Default unchecked
     <div class="custom-control custom-radio">
         <input type="radio" class="custom-control-input" id="defaultUnchecked" name="unchecked">
         <label class="custom-control-label" value="uncheck" for="defaultUnchecked">NO CSV EXPORT</label>
     </div>
 
-    <!-- Default checked -->
+    <!-- Default checked 
     <div class="custom-control custom-radio">
         <input type="radio" class="custom-control-input" id="defaultChecked" name="checked" >
         <label class="custom-control-label" value="checked" for="defaultChecked">CSV EXPORT</label>
-    </div>
+    </div> -->
     <br>
     <input type="submit" value="Search">
 </form>
