@@ -1,4 +1,9 @@
 {% extends "base.html" %} {% block content %}
-<h2 align ="center">Twitter Streaming</h2>
-<p align="center"><a href="{% url 'tstream' %}"><button type="button" class="btn btn-dark">Go to Search page</button></a></p>
+<h2 align="center">Twitter Streaming</h2>
+<form action="{% url 'stream' %}" method='post'>{% csrf_token %}
+    <input class="form-control input-sm" id="keyword" name='keyword' type="text" placeholder="keyword"><br>
+    <input class="form-control input-sm" id="time" name='time' type="text" placeholder="time(sec)"><br>
+    <input class="form-control input-sm" id="count" name='count' type="text" placeholder="count"><br>
+    <p align="center"><input type="submit" value="Search" class="btn btn-dark" ></p>
+</form>
 {% endblock %}
