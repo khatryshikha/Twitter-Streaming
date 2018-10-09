@@ -18,6 +18,7 @@ ACCESS_TOKEN_SECRET = "HNCKoCwkhT40d8KSRaSA2Rx7F90g2vudIlmYrt2tIHOQh"
 CONSUMER_KEY = "8Qq2OVMxT8llyzMQCBIZJQk1N"
 CONSUMER_SECRET = "RL2En81XXUDF1go4p70IfCFvyxK9qyAPPw4Xt4tOnhkifFJ2nD"
 
+#Homepage
 def Homepage(request):
     return render(request,'home_page.html')
 
@@ -124,50 +125,6 @@ def storeData(data, keyword):
 
 		tweets.insert(tweet_detail)
 	
-
-
-#Function to store curated data in database
-# def storeData(data, keyword):
-# 	users = db.users
-# 	tweets =db.tweets
-# 	tid_details = tweets.find_one({'id':data['id']})
-# 	if tid_details == None:
-# 		user_keys = ['id','screen_name', 'name', 'location', 'followers_count']
-# 		qtest = users.find_one({'id':data['user']['id']})
-# 		if qtest == None:
-# 			saveuser = {key: data['user'][key] for key in user_keys}
-# 			saveuser["name_lower"] = data['user']['name'].lower()
-# 			saveuser["screen_name_lower"] = saveuser["screen_name"].lower()
-# 			if data['user']['location']:
-# 				saveuser["location_lower"] = data['user']['location'].lower()
-# 			users.insert(saveuser)
-#             data['user'] = data['user']['id']
-
-# 		data_keys = ['favorite_count', 'id', 'is_quote_status', 'lang', 'retweet_count','user']
-# 		savedata = {key: data[key] for key in data_keys}
-
-# 		if data['truncated'] and 'extended_tweet' in data and 'full_text' in data['extended_tweet']:
-# 			savedata['text'] = data['extended_tweet']['full_text']
-# 		else:
-# 			savedata['text'] = data['text']
-
-# 		savedata['created_at'] = datetime.strptime(data['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
-# 		savedata['text_lower'] = savedata['text'].lower()
-# 		savedata['hashtags'] = [x['text'] for x in data['entities']['hashtags']]
-# 		savedata['hashtags_lower'] = [x['text'].lower() for x in data['entities']['hashtags']]
-# 		savedata['user_mentions'] = [x['screen_name'] for x in data['entities']['user_mentions']]
-# 		savedata['user_mentions_lower'] = [x['screen_name'].lower() for x in data['entities']['user_mentions']]
-# 		savedata['keyword'] = keyword.lower()
-
-# 		savedata['is_retweet'] = False
-# 		if 'retweeted_status' in data:
-# 			savedata['is_retweet'] = True
-
-# 		tweets.insert(savedata)
-
-
-
-
 
 # def searchdate(request):
 #     if request.method == 'POST' :
