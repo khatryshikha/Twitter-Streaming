@@ -51,7 +51,11 @@ def twitter_streaming(request):
 					"message":"Some error occured"
 				}
 		return render(request,'error_page.html',context)
-	return render(request,'search.html')
+	all_results = show_all_results()
+	context ={
+		'data': all_results
+	}
+	return render(request,'all_result.html',context)
 	
 
 # StreamListener class for working on streaming tweets
@@ -133,6 +137,9 @@ def search_data(request):
 	startdate = request.POST.get('startdate')
 	enddate = request.POST.get('enddate')
 	tweet_favcount = request.POST.get('favcount')
+	numFilterType1 = request.POST.get('numFilterType1')
+	numFilterType1 = request.POST.get('numFilterType1')
+	numFilterType1 = request.POST.get('numFilterType1')
 	sortField = request.POST.get('sortField')
    	order = request.POST.get('order')
 	check_export = request. POST.get('checked')
@@ -143,7 +150,8 @@ def search_data(request):
 	tweets = db.tweets
 	if (name != "" ):
 		print 'a'
-		sd = users.find({'name_lower':{'$regex' : str(name.lower())}})
+		name = name.lower()
+		sd = users.find({'name_lower':{'$regex' : str(name)}})
 		for i in sd:
 			ed = tweets.find_one({'user':int(i['id'])})
 			z = merge_two_dicts(i,ed)
@@ -151,7 +159,8 @@ def search_data(request):
 	
 	if (text != "" ):
 		print 'b'
-		sd = tweets.find({'text_lower' :{'$regex' : str(text.lower())}})
+		text = text.lower()
+		sd = tweets.find({'text_lower' :{'$regex' : str(text)}})
 		for i in sd:
 			ed = users.find_one({'id':long(i['user'])})
 			z = merge_two_dicts(i,ed)
@@ -159,7 +168,8 @@ def search_data(request):
 		
 	if (location != "" ):
 		print 'c'
-		sd = users.find({'location_lower':{'$regex' : str(location.lower())}})
+		location = location.lower()
+		sd = users.find({'location_lower':{'$regex' : str(location)}})
 		for i in sd:
 			ed = tweets.find_one({'user':long(i['id'])})
 			z = merge_two_dicts(i,ed)
@@ -167,7 +177,8 @@ def search_data(request):
 	
 	if (language != ""):
 		print 'd'
-		sd = tweets.find({'lang' :{'$regex' : str(language.lower())}})
+		language = language.lower()
+		sd = tweets.find({'lang' :{'$regex' : str(language)}})
 		for i in sd:
 			ed = users.find_one({'id':long(i['user'])})
 			z = merge_two_dicts(i,ed)
@@ -176,33 +187,85 @@ def search_data(request):
 
 	if (retweet_count != ""):
 		print 'e'
-		sd = tweets.find({'retweet_count' :{'$regex' : int(retweet_count)}})
-		for i in sd:
-			ed = users.find_one({'id':long(i['user'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
+		if numFilterType1 == 'none':
+			sd = tweets.find({'retweet_count' : int(retweet_count)})
+			for i in sd:
+				ed = users.find_one({'id':long(i['user'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType1 == 'ge':
+			sd = tweets.find({'retweet_count' :{'$gte' : int(retweet_count)}})
+			for i in sd:
+				ed = users.find_one({'id':long(i['user'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType1 == 'le':
+			sd = tweets.find({'retweet_count' :{'$lte' : int(retweet_count)}})
+			for i in sd:
+				ed = users.find_one({'id':long(i['user'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		
 
 	if (follower != "" ):
 		print 'f'
-		sd = users.find({'followers_count':{'$regex' : int(follower)}})
-		for i in sd:
-			ed = tweets.find_one({'user':long(i['id'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
+		if numFilterType2 == 'none':
+			sd = users.find({'followers_count': int(follower)})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType2 == 'ge':
+			sd = users.find({'followers_count':{'$regex' : int(follower)}})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType2 == 'le':
+			sd = users.find({'followers_count':{'$lte' : int(follower)}})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
 
 	if (tweet_favcount != ""):
 		print 'g'
-		sd = users.find({'favourites_count' :{'$regex' : int(tweet_favcount)}})
+		if numFilterType3 == 'none':
+			sd = users.find({'favourites_count' :int(tweet_favcount)})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType3 == 'ge':
+			sd = users.find({'favourites_count' :{'$gte' : int(tweet_favcount)}})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+		elif numFilterType3 == 'le':
+			sd = users.find({'favourites_count' :{'$lte' : int(tweet_favcount)}})
+			for i in sd:
+				ed = tweets.find_one({'user':long(i['id'])})
+				z = merge_two_dicts(i,ed)
+				result.append(z)
+			
+	if result == []:
+		result = []
+		users = db.users
+		tweets = db.tweets
+		sd = users.find({})
 		for i in sd:
-			ed = tweets.find_one({'user':long(i['id'])})
+			ed = tweets.find_one({'user':int(i['id'])})
 			z = merge_two_dicts(i,ed)
 			result.append(z)
+		
+
 	
     # sorting 
 	if (order == 'Ascending'):
 		newresults = sorted(result, key=itemgetter(sortField), reverse=True)
 	else:
-		newresults = sorted(result, key=itemgetter(sortField), reverse=False)
+		newresults = sorted(result, key=itemgetter(sortFsearchield), reverse=False)
     
 	# print newresults
 	if(check_export == 'on'):
@@ -226,5 +289,19 @@ def get_csv_export(results):
 		spamwriter.writerow(['ID', 'USER_NAME', 'TWEET','RETWEET_COUNT','FAVOURITE_COUNT','FOLLOWERS','CREATED_AT','LANGUAGE','LOCATION'])
 		for i in results:
 			print i
-			spamwriter.writerow([i['id'],i['name'].encode("utf-8"),i['text'].encode("utf-8"),i['retweet_count'],i['favourites_count'],i['followers_count'],i['created_at'],i['lang'],i['location']])
+			spamwriter.writerow([long(i['id']),i['name'].encode("utf-8"),i['text'].encode("utf-8"),i['retweet_count'],i['favourites_count'],i['followers_count'],i['created_at'],i['lang'],i['location']])
 	
+
+def show_all_results():
+	all_result = []
+	users = db.users
+	tweets = db.tweets
+	sd = users.find({})
+	for i in sd:
+		ed = tweets.find_one({'user':int(i['id'])})
+		z = merge_two_dicts(i,ed)
+		all_result.append(z)
+	return all_result
+
+def filter_page(request):
+	return render(request,'search.html')

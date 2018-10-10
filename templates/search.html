@@ -1,21 +1,39 @@
 {% extends "base.html" %} {% block content %}
-{{ "Filter Tweet by: " }}
+<h3>Filter Tweet by: </h3>
 <br>
-<form action="filter" method='post'>{% csrf_token %}
-    <input class="form-control input-sm" id="name" name='name' type="text" placeholder="Type Name"> <br>
-    <input class="form-control input-sm" id="text" name='text' type="text" placeholder="Type for text"> <br>
-    <input class="form-control input-sm" id="location" name='location' type="text" placeholder="Type for location"> <br>
-    <input class="form-control input-sm" id="language" name='language' type="text" placeholder="Type for language"> <br>
+<form action="{% url 'filter_results' %}" method='post'>{% csrf_token %}
+    <h4>Name :</h4><input class="form-control input-sm" id="name" name='name' type="text" placeholder="Type Name"> 
+    <h4>Tweet :</h4><input class="form-control input-sm" id="text" name='text' type="text" placeholder="Type for text"> 
+    <h4>Location :</h4><input class="form-control input-sm" id="location" name='location' type="text" placeholder="Type for location"> 
+    <h4>Language :</h4><input class="form-control input-sm" id="language" name='language' type="text" placeholder="Type for language"> 
+    <h4>Retweet count :</h4>
+    <select name="numFilterType1" class="btn btn-dark"'>
+        <option value="none">None/Equal</option>
+        <option value="ge">greater than or equal to</option>
+        <option value="le">less than or equal to</option>numFilterType == 'eq'
+    </select>
     <input class="form-control input-sm" id="rtcount" name='rtcount' type="text" placeholder="Type for retweet_count">
-    <br>
-    <input class="form-control input-sm" id="followers" name='followers' type="text" placeholder="Type for follower"> <br>
-    <input class="form-control input-sm" id="startdate" name='startdate' type="text" placeholder="Type for startdate">
-    <br>
-    <input class="form-control input-sm" id="enddate" name='enddate' type="text" placeholder="Type for enddate"> <br>
+    <h4>Followers :</h4>
+    <select name="numFilterType2" class="btn btn-dark"'>
+        <option value="none">None/Equal</option>
+        <option value="ge">greater than or equal to</option>
+        <option value="le">less than or equal to</option>numFilterType == 'eq'
+    </select>
+    <input class="form-control input-sm" id="followers" name='followers' type="text" placeholder="Type for follower"> 
+    <h4>Date :</h4>
+    <h5>Start Date :</h5><input class="form-control input-sm" id="startdate" name='startdate' type="text" placeholder="Type for startdate">
+    <h5>End Date :</h5>
+    <input class="form-control input-sm" id="enddate" name='enddate' type="text" placeholder="Type for enddate"> 
+    <h4>Favourite count :</h4>
+    <select name="numFilterType3" class="btn btn-dark"'>
+        <option value="none">None/Equal</option>
+        <option value="ge">greater than or equal to</option>
+        <option value="le">less than or equal to</option>numFilterType == 'eq'
+    </select>
     <input class="form-control input-sm" id="favcount" name='favcount' type="text" placeholder="Type for tweet_favcount">
     <br>
-    <br>
-  {{ 'Sort Data by: ' }}
+    
+  <h3>Sort Data by: </h3>
     <br>
     <select name="order" class="btn btn-dark"'>
         <option value="as">Ascending order</option>
@@ -33,7 +51,7 @@
     </select>
     <br>
     <br><br> 
-    {{ 'Want CSV Export : '}} -->
+    <h3>Want CSV Export : </h3>
     <br>  
     <!-- Default unchecked-->
     <div class="custom-control custom-radio">
