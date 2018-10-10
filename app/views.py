@@ -51,11 +51,7 @@ def twitter_streaming(request):
 					"message":"Some error occured"
 				}
 		return render(request,'error_page.html',context)
-	all_results = show_all_results()
-	context ={
-		'data': all_results
-	}
-	return render(request,'all_result.html',context)
+	return render(request,'search.html')
 	
 
 # StreamListener class for working on streaming tweets
@@ -125,7 +121,6 @@ def storeData(data, keyword):
 			tweet_detail['is_retweet'] = True
 
 		tweets.insert(tweet_detail)
-
 # API-2 Filtering and soting data 
 def search_data(request):
 	name = request.POST.get('name')
@@ -265,7 +260,7 @@ def search_data(request):
 	if (order == 'Ascending'):
 		newresults = sorted(result, key=itemgetter(sortField), reverse=True)
 	else:
-		newresults = sorted(result, key=itemgetter(sortFsearchield), reverse=False)
+		newresults = sorted(result, key=itemgetter(sortField), reverse=False)
     
 	# print newresults
 	if(check_export == 'on'):
@@ -291,17 +286,3 @@ def get_csv_export(results):
 			print i
 			spamwriter.writerow([long(i['id']),i['name'].encode("utf-8"),i['text'].encode("utf-8"),i['retweet_count'],i['favourites_count'],i['followers_count'],i['created_at'],i['lang'],i['location']])
 	
-
-def show_all_results():
-	all_result = []
-	users = db.users
-	tweets = db.tweets
-	sd = users.find({})
-	for i in sd:
-		ed = tweets.find_one({'user':int(i['id'])})
-		z = merge_two_dicts(i,ed)
-		all_result.append(z)
-	return all_result
-
-def filter_page(request):
-	return render(request,'search.html')
