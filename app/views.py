@@ -135,7 +135,7 @@ def search_data(request):
 	tweet_favcount = request.POST.get('favcount')
 	sortField = request.POST.get('sortField')
    	order = request.POST.get('order')
-	# check_export = request. POST.get('checked')
+	check_export = request. POST.get('checked')
 
 	print retweet_count
 	result = []
@@ -204,11 +204,27 @@ def search_data(request):
 	else:
 		newresults = sorted(result, key=itemgetter(sortField), reverse=False)
     
-	print newresults
-	return render(request,'home_page.html')
+	# print newresults
+	if(check_export == 'on'):
+		get_csv_export(newresults)
+	
+	context = {
+
+		'newresults': newresults
+	}
+	return render(request,'result.html',context)
 
 def merge_two_dicts(x, y):
 	z = x.copy()
 	z.update(y)
 	return z
+
+#API3 - CSV export	
+def get_csv_export(results):
+	with open('output.csv', 'wb') as csvfile:
+		spamwriter = csv.writer(csvfile , lineterminator='\n')
+		spamwriter.writerow(['ID', 'USER_NAME', 'TWEET','RETWEET_COUNT','FAVOURITE_COUNT','FOLLOWERS','CREATED_AT','LANGUAGE','LOCATION'])
+		for i in results:
+			print i
+			spamwriter.writerow([i['id'],i['name'].encode("utf-8"),i['text'].encode("utf-8"),i['retweet_count'],i['favourites_count'],i['followers_count'],i['created_at'],i['lang'],i['location']])
 	

@@ -1,1 +1,4 @@
-uid,user,tweet,retweet_count,fav_count,followers,created_at,language,location
+ID,USER_NAME,TWEET,RETWEET_COUNT,FAVOURITE_COUNT,FOLLOWERS,CREATED_AT,LANGUAGE,LOCATION
+1049719005391417344,Harry Sam,"RT @iScrew: “Gujarat mein hum nahi toh Kashi mein Modi nahi” 😈
+#GujaratExodus https://t.co/dTCLtIcYmR",0,29733,132,2018-10-09 17:51:28,hi,
+3300305262,shadab shaikh,RT @neo_pac: We made false promises because we were sure of Not winning-now when people remind us of our promises we just laugh and move on…,0,2987,17,2018-10-09 18:59:44,en,
