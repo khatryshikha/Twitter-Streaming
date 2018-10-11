@@ -2,276 +2,294 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render
+from django.http import JsonResponse
 from tweepy import OAuthHandler
 from tweepy import Stream
 import csv
 import json
 from datetime import datetime
 from tweepy.streaming import StreamListener
+from django.views.decorators.csrf import csrf_exempt
 from .database import dbs as db
 import itertools
 from operator import itemgetter
 # Create your views here.
+import time
+from django.conf import settings
 
 ACCESS_TOKEN = "802829156698365952-qQNT1TEO71DDxxjBHfP1zPo96DwrZT3"
 ACCESS_TOKEN_SECRET = "HNCKoCwkhT40d8KSRaSA2Rx7F90g2vudIlmYrt2tIHOQh"
 CONSUMER_KEY = "8Qq2OVMxT8llyzMQCBIZJQk1N"
 CONSUMER_SECRET = "RL2En81XXUDF1go4p70IfCFvyxK9qyAPPw4Xt4tOnhkifFJ2nD"
 
-#Homepage
-def Homepage(request):
-    return render(request,'home_page.html')
+from .api1 import *
 
-#API 1 - To stream data based on keyword/time/count
-def twitter_streaming(request):
-	keyword = request.POST.get('keyword')
-	keyword = str(keyword)
-	time = request.POST.get('time')
-	count = request.POST.get('count')
-	try:
-		if time == None or time == "":
-			time = 0
-		if count == None or count == "":
-			count = 0
-		if time == 0 and count ==0:
-			context = {
-						"code":"1","status":"failed",
-						"message":"No Parameters Passed"
-					}
-			return render(request,'error_page.html',context)
-		l = StdOutListener(int(time), int(count), keyword)
+# def Merge(dict1, dict2): 
+#     return(dict2.update(dict1)) 
 
-		auth = OAuthHandler(CONSUMER_KEY,CONSUMER_SECRET)
-		auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-		stream = Stream(auth, l)
-		stream.filter(track=[keyword])
-	except:
-		context = {
-					"code":"1","status":"failed",
-					"message":"Some error occured"
-				}
-		return render(request,'error_page.html',context)
-	return render(request,'search.html')
-	
-
-# StreamListener class for working on streaming tweets
-class StdOutListener(StreamListener):
-	def __init__(self, time, count, keyword):
-		self.maxtweet = count
-		self.time = time
-		self.tweetcount = 0
-		self.starttime = datetime.now()
-		self.keyword = keyword
-
-	def on_data(self, data):
-		if self.time and (datetime.now()-self.starttime).seconds >= self.time:
-			return False
-
-		data_load= json.loads(data)
-		storeData(data_load, self.keyword)
-
-		self.tweetcount+=1
-		if self.time and (datetime.now()-self.starttime).seconds >= self.time:
-			return False
-
-		if self.maxtweet and self.tweetcount >= self.maxtweet:
-			return False
-
-		return True
-
-	def on_error(self, status):
-		print status
-
-#Function to store curated data in database
-def storeData(data, keyword):
-	users = db.users
-	tweets = db.tweets
-	tweet_test = tweets.find_one({'id':data['id']})
-	if tweet_test == None:
-		user_keys = ['id','screen_name', 'name', 'location', 'followers_count']
-		user_test = users.find_one({'id':data['user']['id']})
-		if user_test == None:
-			user_details = {key: data['user'][key] for key in user_keys}
-			user_details["name_lower"] = data['user']['name'].lower()
-			user_details["screen_name_lower"] = data['user']['screen_name'].lower()
-			user_details['favourites_count'] = data['user']['favourites_count']
-			if data['user']['location']:
-				user_details["location_lower"] = data['user']['location'].lower()
-			users.insert(user_details)
-		data['user'] = data['user']['id']
-		data_keys = ['favorite_count', 'id', 'is_quote_status', 'lang', 'retweet_count','user']
-		tweet_detail = {key: data[key] for key in data_keys}
-
-		if data['truncated'] and 'extended_tweet' in data and 'full_text' in data['extended_tweet']:
-			tweet_detail['text'] = data['extended_tweet']['full_text']
-		else:
-			tweet_detail['text'] = data['text']
-
-		tweet_detail['created_at'] = datetime.strptime(data['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
-		tweet_detail['text_lower'] = tweet_detail['text'].lower()
-		for x in data['entities']['hashtags']:
-			tweet_detail['hashtags'] = x['text']
-			tweet_detail['hashtags_lower'] = x['text'].lower()
-		for x in data['entities']['user_mentions']:
-			tweet_detail['user_mentions'] = x['screen_name']
-			tweet_detail['user_mentions_lower'] = x['screen_name'].lower()
-		tweet_detail['keyword'] = keyword.lower()
-		tweet_detail['is_retweet'] = False
-		if 'retweeted_status' in data:
-			tweet_detail['is_retweet'] = True
-
-		tweets.insert(tweet_detail)
+def Merge(x, y):
+    z = x.copy()   # start with x's keys and values
+    z.update(y)    # modifies z with y's keys and values & returns None
+    return z
 # API-2 Filtering and soting data 
+@csrf_exempt
 def search_data(request):
-	name = request.POST.get('name')
-	text = request.POST.get('text')
-	location = request.POST.get('location')
-	language = request.	POST.get('language')
-	retweet_count = request.POST.get('rtcount')
-	follower = request.POST.get('followers')
-	startdate = request.POST.get('startdate')
-	enddate = request.POST.get('enddate')
-	tweet_favcount = request.POST.get('favcount')
-	numFilterType1 = request.POST.get('numFilterType1')
-	numFilterType1 = request.POST.get('numFilterType1')
-	numFilterType1 = request.POST.get('numFilterType1')
-	sortField = request.POST.get('sortField')
-   	order = request.POST.get('order')
-	check_export = request. POST.get('checked')
-
-	print retweet_count
+	if request.method == 'POST':
+		user_name = request.POST.get('user_name')
+		tweet_text = request.POST.get('tweet_text')
+		location = request.POST.get('location')
+		language = request.	POST.get('language')
+		retweet_count = request.POST.get('rtcount')
+		follower = request.POST.get('followers')
+		startdate = request.POST.get('startdate')
+		enddate = request.POST.get('enddate')
+		tweet_favcount = request.POST.get('favcount')
+		sortField = request.POST.get('sfield')
+		order = request.POST.get('order')
+		page = request.POST.get('page')
+	elif request.method == 'GET':
+		user_name = request.GET.get('user_name')
+		tweet_text = request.GET.get('tweet_text')
+		location = request.GET.get('location')
+		language = request.	GET.get('language')
+		retweet_count = request.GET.get('rtcount')
+		follower = request.GET.get('followers')
+		startdate = request.GET.get('startdate')
+		enddate = request.GET.get('enddate')
+		tweet_favcount = request.GET.get('favcount')
+		sortField = request.GET.get('sfield')
+		order = request.GET.get('order')
+		page = request.GET.get('page')
+#&order=asc&sfield=favourites_count
+	# return JsonResponse({"as":"asd"})
 	result = []
 	users = db.users
 	tweets = db.tweets
-	if (name != "" ):
-		print 'a'
-		name = name.lower()
-		sd = users.find({'name_lower':{'$regex' : str(name)}})
-		for i in sd:
-			ed = tweets.find_one({'user':int(i['id'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
-	
-	if (text != "" ):
-		print 'b'
-		text = text.lower()
-		sd = tweets.find({'text_lower' :{'$regex' : str(text)}})
-		for i in sd:
-			ed = users.find_one({'id':long(i['user'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
-		
-	if (location != "" ):
-		print 'c'
-		location = location.lower()
-		sd = users.find({'location_lower':{'$regex' : str(location)}})
-		for i in sd:
-			ed = tweets.find_one({'user':long(i['id'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
-	
-	if (language != ""):
-		print 'd'
-		language = language.lower()
-		sd = tweets.find({'lang' :{'$regex' : str(language)}})
-		for i in sd:
-			ed = users.find_one({'id':long(i['user'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
-			
+	if (user_name != None and tweet_text != None):
+		print 'both'
+		user_name = user_name.lower()
+		user_info = users.find_one({"screen_name": str(user_name)})
+		if user_info == None:
+			a = [{}]
+			a = json.dumps(a)
+			return JsonResponse(a, safe=False)
+		all_tweets = tweets.find({'user': int(user_info['id']), 'text_lower': { '$regex': str(tweet_text) } })
+		user_info.pop('_id', None)
+		for i in all_tweets:
+			i.pop('_id', None)
+			k = Merge(user_info, i)
+			result.append(k)
 
-	if (retweet_count != ""):
-		print 'e'
-		if numFilterType1 == 'none':
-			sd = tweets.find({'retweet_count' : int(retweet_count)})
-			for i in sd:
-				ed = users.find_one({'id':long(i['user'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType1 == 'ge':
-			sd = tweets.find({'retweet_count' :{'$gte' : int(retweet_count)}})
-			for i in sd:
-				ed = users.find_one({'id':long(i['user'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType1 == 'le':
-			sd = tweets.find({'retweet_count' :{'$lte' : int(retweet_count)}})
-			for i in sd:
-				ed = users.find_one({'id':long(i['user'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		
+	elif (user_name != None):
+		user_name = user_name.lower()
+		user_info = users.find_one({"screen_name": str(user_name)})
+		if user_info == None:
+			a = [{}]
+			a = json.dumps(a)
+			return JsonResponse(a, safe=False)
+		all_tweets = tweets.find({'user': int(user_info['id'])})
+		user_info.pop('_id', None)
+		for i in all_tweets:
+			i.pop('_id', None)
+			k = Merge(user_info, i)
+			result.append(k)
 
-	if (follower != "" ):
-		print 'f'
-		if numFilterType2 == 'none':
-			sd = users.find({'followers_count': int(follower)})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType2 == 'ge':
-			sd = users.find({'followers_count':{'$regex' : int(follower)}})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType2 == 'le':
-			sd = users.find({'followers_count':{'$lte' : int(follower)}})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-
-	if (tweet_favcount != ""):
-		print 'g'
-		if numFilterType3 == 'none':
-			sd = users.find({'favourites_count' :int(tweet_favcount)})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType3 == 'ge':
-			sd = users.find({'favourites_count' :{'$gte' : int(tweet_favcount)}})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-		elif numFilterType3 == 'le':
-			sd = users.find({'favourites_count' :{'$lte' : int(tweet_favcount)}})
-			for i in sd:
-				ed = tweets.find_one({'user':long(i['id'])})
-				z = merge_two_dicts(i,ed)
-				result.append(z)
-			
-	if result == []:
-		result = []
-		users = db.users
-		tweets = db.tweets
-		sd = users.find({})
-		for i in sd:
-			ed = tweets.find_one({'user':int(i['id'])})
-			z = merge_two_dicts(i,ed)
-			result.append(z)
-		
-
-	
-    # sorting 
-	if (order == 'Ascending'):
-		newresults = sorted(result, key=itemgetter(sortField), reverse=True)
+	elif (tweet_text != None):
+		all_tweets = tweets.find({'text_lower': { '$regex': str(tweet_text) } })
+		for i in all_tweets:
+			user_info = users.find_one({'id': i['users']})
+			user_info.pop('_id', None)
+			i.pop('_id', None)
+			k = Merge(user_info, i)
+			result.append(k)
 	else:
-		newresults = sorted(result, key=itemgetter(sortField), reverse=False)
-    
-	# print newresults
-	if(check_export == 'on'):
-		get_csv_export(newresults)
+		all_tweets = tweets.find({})
+		for i in all_tweets:
+			user_info = users.find_one({'id': i['user']})
+			i.pop('_id', None)
+			user_info.pop('_id', None)
+			k = Merge(user_info, i)
+			result.append(k)
+
+	if (location != None ):
+		location = location.lower()
+		i = 0
+		to_del = []
+		for i in range(len(result)):
+			if result[i]['location'] != location:
+				to_del.append(i)
+		k = 0
+		for i in to_del:
+			print i
+			del result[i-k]
+			k = k + 1	
+			
+	if (language != None ):
+		language = language.lower()
+		i = 0
+		to_del = []
+		for i in range(len(result)):
+			if result[i]['lang'] != language:
+				to_del.append(i)
+		k = 0
+		for i in to_del:
+			print i
+			del result[i-k]
+			k = k + 1
+
+	if (retweet_count != None):
+		filter = retweet_count[0] + retweet_count[1]
+		retweet_count = retweet_count[2:]
+		if filter == 'eq':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['retweet_count'] != int(retweet_count):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
 	
-	context = {
+		elif filter == 'ge':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['retweet_count'] < int(retweet_count):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
 
-		'newresults': newresults
-	}
-	return render(request,'result.html',context)
+		elif filter == 'le':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['retweet_count'] > int(retweet_count):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+		
 
+	if (follower != None):
+		print 'e'
+		filter = follower[0] + follower[1]
+		follower = follower[2:]
+		if filter == 'eq':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['followers_count'] != int(follower):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+		elif filter == 'ge':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['followers_count'] < int(follower):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+		elif filter == 'le':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['followers_count'] > int(follower):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+	if (tweet_favcount != None):
+		print 'e'
+		filter = tweet_favcount[0] + tweet_favcount[1]
+		tweet_favcount = tweet_favcount[2:]
+		if filter == 'eq':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['favorite_count'] != int(tweet_favcount):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+		elif filter == 'ge':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['favorite_count'] < int(tweet_favcount):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+		elif filter == 'le':
+			i = 0
+			to_del = []
+			for i in range(len(result)):
+				if result[i]['favorite_count'] > int(tweet_favcount):
+					to_del.append(i)
+			k = 0
+			for i in to_del:
+				print i
+				del result[i-k]
+				k = k + 1
+
+
+	if (startdate != None and enddate != None):
+		res2 = []
+		startdate = datetime.strptime(startdate, "%Y-%m-%d")
+		enddate = datetime.strptime(enddate, "%Y-%m-%d")
+		for i in result:
+			if ( datetime.strptime(i['created_at'], "%Y-%m-%d %H:%M:%S") >= startdate and datetime.strptime(i['created_at'], "%Y-%m-%d %H:%M:%S") <= enddate ):
+				res2.append(i)
+		result = res2
+	elif (startdate != None):
+		res2 = []
+		startdate = datetime.strptime(startdate, "%Y-%m-%d")
+		for i in result:
+			if ( datetime.strptime(i['created_at'], "%Y-%m-%d %H:%M:%S") >= startdate):
+				res2.append(i)
+		result = res2
+	elif (enddate != None):
+		res2 = []
+		enddate = datetime.strptime(enddate, "%Y-%m-%d")
+		for i in result:
+			if ( datetime.strptime(i['created_at'], "%Y-%m-%d %H:%M:%S") <= enddate ):
+				res2.append(i)
+		result = res2
+
+	if (order == 'asc'):
+		result = sorted(result, key = lambda i: i[sortField]) 
+	elif (order == 'dsc'):
+		result = sorted(result, key = lambda i: i[sortField], reverse=False)
+    
+	settings.RESULT = result
+	result = result[((int(page)-1)*10):((int(page))*10)]
+	return JsonResponse(result, safe=False)
+	
 def merge_two_dicts(x, y):
 	z = x.copy()
 	z.update(y)
@@ -279,6 +297,7 @@ def merge_two_dicts(x, y):
 
 #API3 - CSV export	
 def get_csv_export(results):
+	print settings.RESULT
 	with open('output.csv', 'wb') as csvfile:
 		spamwriter = csv.writer(csvfile , lineterminator='\n')
 		spamwriter.writerow(['ID', 'USER_NAME', 'TWEET','RETWEET_COUNT','FAVOURITE_COUNT','FOLLOWERS','CREATED_AT','LANGUAGE','LOCATION'])

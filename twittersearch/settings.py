@@ -124,3 +124,5 @@ STATIC_URL = '/static/'
 
 MONGO_URI = 'localhost'
 MONGO_PORT = 27017
+
+RESULT = ''
