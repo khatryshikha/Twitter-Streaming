@@ -26,7 +26,7 @@ SECRET_KEY = 'z92#7@=a2d4r8in$^yv-ppp0%q48%7eg)#@yunejutwey&as&8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -124,6 +124,6 @@ STATIC_URL = '/static/'
 
 MONGO_URI = 'localhost'
 MONGO_PORT = 27017
-# MONGO_URI = 'mongodb://shikha26:shikha26@ds159845.mlab.com:59845/hackercamp'
+# MONGO_URI = 'mongodb://shikha12:shikha12@ds159845.mlab.com:59845/hackercamp'
 
 RESULT = ''

@@ -7,8 +7,8 @@ This set of APIs has been created to store twitter streaming data and retrieve d
 
 Technologies used:
   - Python/ Django framework
-  <!-- - MongoDB (Hosted on MLab) -->
   - Twitter Streaming API
+  <!-- - MongoDB (Hosted on MLab) -->
   
 ## Jump To
 - [Installation Instructions](#installation-instructions)
@@ -18,8 +18,8 @@ Technologies used:
   
 ## Installation Instructions
   1. clone the project
-  `git clone https://github.com/`
-  2. cd to project folder `cd ` and create virtual environment
+  `git clone https://github.com/khatryshikha/InnovaccerHackerCamp.git`
+  2. cd to project folder `cd InnovaccerHackerCamp-19` and create virtual environment
   `virtualenv venv`
   3. activate virtual environment
   `source venv/bin/activate`
@@ -28,7 +28,7 @@ Technologies used:
   5. run the server
   `python manage.py runserver`
    
-## 1. API to trigger Twitter Stream (/stream)
+## 1. API to trigger Twitter Stream (/twitter/stream)
 This API triggers twitter streaming and stores a curated version of the data returned by Twitter Streaming API. The streaming is done as per the given parameters.
 
 API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
@@ -55,34 +55,30 @@ API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
   <b>Examples:</b>
   
   1. Successful response
-  ```
- {
-    "status": "success",
+   ```
+  {
+     "status": "success",
     "Message": "Succesfully added twitter data to database",
     "code": "0"
-}
+  }
   ```
-  2. Failed Response
-  a.When `<time>` or `<count>` parameters are passed.
-  ```
-  {
-    "status": "failed",
-    "Message": "No Parameters Passed",
-    "code": "1"
-    }
 
-  ```
-  a. When `<time>` or `<count>` parameters are passed.
-  ```
+  2. Failed Response
+   ```
+  a) When `<time>` or `<count>` parameters are passed.
+
+
   {
     "status": "failed",
     "Message": "No Parameters Passed",
     "code": "1"
-    }
-    
-  ```
-  b. When failed to fetch data.
-  ```
+  }
+
+
+
+  b) When failed to fetch data.
+
+
   {
     "status": "failed",
     "Message": "Some error occured",
@@ -92,36 +88,32 @@ API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
   ```
 
 
-## 2. API to filter/search stored tweets (/search)
-<!-- This API fetches the data stored by the [first api](#1-api-to-trigger-twitter-stream) based on the filters and search keywords provided and sorts them as required.
+## 2. API to filter/search stored tweets (/twitter/search)
+This API fitler or search the fetched data stored by the [first api](#1-api-to-trigger-twitter-stream) and sorts them as required.
 
-API - `http://127.0.0.1:5000/search?[filters][sort][page]`
+API - `http://127.0.0.1:8000/twitter/filter?<filter>[parameters]<sortfield><order><page>`
 (methods supported - GET, POST)
 
 <b>Following are the elements of the api:</b>
 ### Filters ([filters])
-The filters follow format `<filter>=<value>` where `<filter>` can be one or more of filters mentioned below and `<value>` should be in the specified format. 
+Initially this API is used to filter the data by tweet text/user name i.e `<filter>=<user_name>` or `<filter>=<tweet_text>` where these `<filter>` can be filtered by one or more parameters or if `<filter>=<none>` then this API use all data to filter data as mentioned below and `<value>` should be in the specified format.
   
   
-Following filters can be applied
+Following parameters can be applied:
 
   | Filter | Meaning | Value Format (refer table below) | Example |
   | ------ | ----- | ------ | ----- |
-  | hashtag | filter tweets by hashtags in tweet (case insensitive) | `<hashtag>` | hashtag=AbKiBaarModiSarkar |
-  | keyword | filter tweets by keyword which was used in API 1 for streaming | `<keyword>` | keyword=modi |
-  | name | filter tweets by name/ screen_name of users (case insensitive) | `<textFilterType>-<filterValue>` | name=co-gaurav |
-  | location | location of the user posting the tweet | `<location>` | location=delhi |
-  | text | filter tweets by content (case insensitive) | `<textFilterType>-<filterValue>` | text=sw-gaurav |
-  | type | filter tweets as retweets/quote/original tweets | original/retweet/quote | type=retweet |
-  | mention | filter tweets by user mentions(case insensitive) | `<textFilterType>-<filterValue>` | mention=em-gauravkul96 |
-  | followers | number of followers of the user | `<numFilterType><filterValue>`| followers=lt100 |
-  | rtcount (mostly 0 in streaming) | retweet count of tweet | `<numFilterType><filterValue>`| rtcount=gt100 |
-  | favcount (mostly 0 in streaming) | favourite count of tweet | `<numFilterType><filterValue>`| favcount=lt100 |
-  | lang | Language of tweet | any specific language in [BCP 47](https://tools.ietf.org/html/bcp47) format | lang=en |
-  | datestart | Tweets posted on or after a specific date | `dd-mm-yyyy` | datestart=10-01-2018 |
-  | dateend | Tweets posted on or before a specific date | `dd-mm-yyyy` | dateend=28-02-2018 |
+  | user_name | filter tweets by user_name (case insensitive) | `<textFilterType>-<filterValue>` | name=co-shikha | 
+  | tweet_text | filter tweets by partial/whole from content (case insensitive) | `<filterValue>` | text=India |
+  | location | location of the user posting the tweet | `<location>` | location=Jaipur |
+  | language | Language of tweet | any specific language in [BCP 47](https://tools.ietf.org/html/bcp47) format | language=en |
+  | retweet_count (mostly 0) | retweet count of tweet | `<numFilterType><filterValue>`| retweet_count=eq100 |
+  | follower | number of followers of the user | `<numFilterType><filterValue>`| followers=le100 |
+  | tweet_favcount (mostly 0) | favourite count of tweet | `<numFilterType><filterValue>`| tweet_favcount=ge200 |
+  | startdate | Tweets posted on or after a specific date | `yyyy-mm-dd` | startdate=2018-10-12 |
+  | enddate | Tweets posted on or before a specific date | `yyyy-mm-dd` | enddate=2018-10-14 |
   
-  In the format `<textFilterType><filterValue>`, `<filterValue>` can be any string and `<textFilterType>` can be
+  In the format `<textFilterType>-<filterValue>`,`<textFilterType>` can be
 
   | textFilterType | Meaning |
   | ------ | ------ |
@@ -130,18 +122,16 @@ Following filters can be applied
   | co | contains |
   | em | exact match |
   
-  In the format `<numFilterType><filterValue>`, `<filterValue>` can be any number and `<numFilterType>` can be
+  In the format `<numFilterType><filterValue>`, `<numFilterType>` can be
 
   | numFilterType | Meaning |
   | ------ | ------ |
-  | gt | greater than |
-  | lt | less than |
   | eq | equal to |
   | ge | greater than or equal to |
   | le | less than or equal to |
   
 ### Sort ([sort])
-By default, sorting is done by date of tweet in descending order. Other sort types can be given by mentionin the `sort` parameter in the API in the format `<sortField>-<order>`
+Sorting can be done by any filter, parameter , date of tweet in both ascending and descending order. By default, sorting is done by name of user in ascending order The format of `<order>` & `<sortField>`
 
 where  `<order>` can be
 
@@ -150,58 +140,83 @@ where  `<order>` can be
   | asc | Ascending order |
   | dsc | descending order |
   
-and `<sortField>` can be
+and `<sortField>` can be any field .
 
   | sortField | Meaning | Example |
   | ------ | ------ | ------ |
-  | name | sort by name | sort=name-asc |
-  | sname | sort by screen name | sort=sname-dsc |
-  | text | sort by tweet text | sort=text-asc |
-  | fav | sort by favourites count | sort=fav-asc |
-  | ret | sort by retweet count | sort=ret-dsc |
-  | followers | sort by follower count of user | sort=followers-asc |
-  | date | sort by date | sort=date-asc |
+  | name | sort by name | sfield=name |
+  | screen_name | sort by screen name | sfield=screen_name |
+  | retweet_count | sort by retweet count | sfield=retweet_count |
+  | followers_count | sort by follower count of user | sfield=followers_count |
+  | created_at | sort by date | sfield=created_at |
   
 ### Page ([page])
 The API is paginated and returns 10 results in one call. The page number can be specified in the API call as `page=[pageNo]` for example `page=5`. Not speciftying the page number takes to page 1.
 
 <b>Examples</b>
 ```
-http://127.0.0.1:5000/search?favcount=lt1000&lang=en&datestart=10-01-2018&sort=date-asc
-http://127.0.0.1:5000/search?name=co-gaurav&datestart=10-01-2018&dateend=15-01-2018&sort=text-asc&page=2
-http://127.0.0.1:5000/search?rtcount=gt100
+http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&followers_count=gt100&sfield=created_at&order=asc&page=2
+
 ```
 
-### API Response
-
-  | Parameter | Meaning |
-  | ------ | ------ |
-  | page | current page number |
-  | next_page | next page number (1 if current page is last page) |
-  | last_page | Boolean true/false (true if current page is last page else false) |
-  | result | list of tweet objects that match the given filters |
-  | result_count | total number of matching results |
   
 <b>Examples</b>
-```
-{
-   "next_page": 1, 
-   "last_page": true, 
-   "result": [{"lang": "en", "_id": "5a83f5063fe5103329f1f788", "text": "RT @LalitKModi: Thank you #RichardMadley \ud83d\ude4f\ud83c\udffb most appreciative of your kind words  https://t.co/erkxF1q46i", "created_at": "2018-02-14 08:36:16+00:00", "hashtags": ["RichardMadley"], "retweet_count": 0, "user_mentions": ["LalitKModi"], "is_quote_status": false, "user": {"screen_name": "LaraeGalang3", "location": null, "_id": "5a83f5053fe5103329f1f786", "id": 963690891935473666, "name": "Larae Galang"}, "id": 963693359742312448, "favorite_count": 0, "is_retweet": true}],
-   "page": 1,
-   "result_count": 1
-}
+1. For given API- http://127.0.0.1:8000/twitter/filter/?sfield=name&order=asc&created_at=2018-10-12&page=1 results are as followers :
 
-{
-  "next_page": 3, 
-  "last_page": false, 
-  "result": [...], 
-  "page": 2
-  "result_count": 43
-} -->
+```
+[
+  {
+        "text_lower": "rt @rishibagree: madhu koda is serving jail sentence for                     coal scam.\nhis wife geeta koda joins congress in front of                  rahul gandhi who is out…",
+        "is_quote_status": true,
+        "text": "RT @rishibagree: Madhu koda is serving Jail sentence for Coal                scam.\nHis Wife Geeta Koda joins Congress in front of Rahul                 Gandhi who is out…",
+        "screen_name_lower": "ankit_das1987",
+        "user_mentions": "rishibagree",
+        "location_lower": "india",
+        "user": 802403623552417792,
+        "id": 1050643693491769356,
+        "favorite_count": 0,
+        "screen_name": "ankit_das1987",
+        "lang": "en",
+        "favourites_count": 19795,
+        "name": "ANKIT DAS",
+        "keyword": "modi",
+        "name_lower": "ankit das",
+        "created_at": "2018-10-12 07:05:51",
+        "user_mentions_lower": "rishibagree",
+        "followers_count": 166,
+        "location": "India",
+        "retweet_count": 0,
+        "is_retweet": true
+    },
+    {
+        "text_lower": "rt @captmrinalc: @manishanataraj @mohua_india @cnbctv18news                 @pmoindia @myogiadityanath if figures r to b believed, n                       don’t see no  reason wh…",
+        "is_quote_status": false,
+        "text": "RT @CaptMrinalC: @manishanataraj @MoHUA_India @CNBCTV18News                @PMOIndia @myogiadityanath If figures r to b believed, n don’t see          no reason wh…",
+        "screen_name_lower": "captmrinalc",
+        "user_mentions": "myogiadityanath",
+        "location_lower": "new delhi",
+        "user": 1044286855,
+        "id": 1050697551488458752,
+        "favorite_count": 0,
+        "screen_name": "CaptMrinalC",
+        "lang": "en",
+        "favourites_count": 380,
+        "name": "Capt Mrinal",
+        "keyword": "modi",
+        "name_lower": "capt mrinal",
+        "created_at": "2018-10-12 10:39:51",
+        "user_mentions_lower": "myogiadityanath",
+        "followers_count": 390,
+        "location": "New Delhi",
+        "retweet_count": 0,
+        "is_retweet": true
+    }
+    ....
+  ]
+
 ```
 
-##3. API to export filtered data in CSV (/getcsv)
+## 3. API to export filtered data in CSV (/twitter/export)
 This API returns the data in CSV. If opened in browser, it downloads a CSV file containin the data and if hit using another program, it returns the data in CSV format.
 
 API : `http://127.0.0.1:8000/twitter/export`

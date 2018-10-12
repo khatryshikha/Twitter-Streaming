@@ -307,7 +307,8 @@ def search_data(request):
 				res2.append(i)
 		result = res2
 
-	if (order == 'asc'):
+	if (order == 'asc' or order == None):
+		sortField = 'name'
 		result = sorted(result, key = lambda i: i[sortField]) 
 	elif (order == 'dsc'):
 		result = sorted(result, key = lambda i: i[sortField], reverse=False)
