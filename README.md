@@ -41,7 +41,7 @@ API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
   <b>Examples:</b>
   ```
   http://127.0.0.1:8000/twitter/stream?keyword=modi&count=10 (runs till 10 tweets are fetched for keyword 'modi')
-  http://127.0.0.1:8000/twitter/stream?keyword=moditime=10 (runs for 10 seconds to fetch tweets for keyword 'modi')
+  http://127.0.0.1:8000/twitter/stream?keyword=modi&time=10 (runs for 10 seconds to fetch tweets for keyword 'modi')
   http://127.0.0.1:8000/twitter/stream?keyword=modi&count=10&time=10 (stops streaming whichever comes first i.e. 10 tweets or 10 seconds)
   ```
   ### API Response
