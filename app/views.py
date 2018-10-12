@@ -75,7 +75,7 @@ def search_data(request):
 		elif typefilter == 'sw':
 			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)}})
 		elif typefilter == 'ew':
-			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)+"$"}})
+			user_info = users.find_one({"name_lower":{'$regex': str(user_name)+"$"}})
 		
 		if user_info == None:
 			a = [{}]
@@ -99,7 +99,7 @@ def search_data(request):
 		elif typefilter == 'sw':
 			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)}})
 		elif typefilter == 'ew':
-			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)+"$"}})
+			user_info = users.find_one({"name_lower":{'$regex': str(user_name)+"$"}})
 		if user_info == None:
 			a = [{}]
 			a = json.dumps(a)
@@ -331,4 +331,4 @@ def get_csv_export(request):
 		for i in results:
 			print i
 			spamwriter.writerow([long(i['id']),i['name'].encode("utf-8"),i['text'].encode("utf-8"),i['retweet_count'],i['favourites_count'],i['followers_count'],i['created_at'],i['lang'],i['location']])
-	
+	return JsonResponse( { "Message":"Successfully exported" })

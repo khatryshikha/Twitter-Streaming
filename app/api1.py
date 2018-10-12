@@ -44,11 +44,10 @@ def twitter_streaming(request):
 		if count == None or count == "":
 			count = 0
 		if time == 0 and count ==0:
-			context = {
-						"code":"1","status":"failed",
-						"message":"No Parameters Passed"
-					}
-			return render(request,'error_page.html',context)
+			return JsonResponse( {	"code":"1",
+								"status":"failed",
+								"Message":"No Parameters Passed"
+				})
 		l = StdOutListener(int(time), int(count), keyword)
 
 		auth = OAuthHandler(CONSUMER_KEY,CONSUMER_SECRET)
@@ -56,12 +55,13 @@ def twitter_streaming(request):
 		stream = Stream(auth, l)
 		stream.filter(track=[keyword])
 	except:
-		context = {
-					"code":"1","status":"failed",
-					"message":"Some error occured"
-				}
-		return render(request,'error_page.html',context)
-	return JsonResponse({'Message':'Succesfully added twitter data to database'})
+		return JsonResponse( {	"code":"1",
+								"status":"failed",
+								"Message":"Some error occured"
+				})
+	return JsonResponse( {	'code': '0',
+							'Message':'Succesfully added twitter data to database',
+							'status': 'success'})
 	# return render(request,'search.html')
 	
 

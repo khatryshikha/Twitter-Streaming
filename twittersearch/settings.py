@@ -124,5 +124,6 @@ STATIC_URL = '/static/'
 
 MONGO_URI = 'localhost'
 MONGO_PORT = 27017
+# MONGO_URI = 'mongodb://shikha26:shikha26@ds159845.mlab.com:59845/hackercamp'
 
 RESULT = ''
