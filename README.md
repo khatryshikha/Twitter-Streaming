@@ -1,9 +1,9 @@
-# InnovaccerHackerCamp
+# InnovaccerHackerCamp-19
 
 This set of APIs has been created to store twitter streaming data and retrieve data based on applied filters. It is a set of 3 APIs-
-1. [API to trigger Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
+1. [API for Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
 2. [API to filter/search stored tweets](#2-api-to-filtersearch-stored-tweets-search)
-3. [API to export filtered data in CSV](#3-api-to-export-filtered-data-in-csv-getcsv)
+3. [API to export filtered data to CSV](#3-api-to-export-filtered-data-in-csv-getcsv)
 
 Technologies used:
   - Python/ Django framework
@@ -12,9 +12,9 @@ Technologies used:
   
 ## Jump To
 - [Installation Instructions](#installation-instructions)
-- [API 1 - API to trigger Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
+- [API 1 - API for Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
 - [API 2 - API to filter/search stored tweets](#2-api-to-filtersearch-stored-tweets-search)
-- [API 3 - API to export filtered data in CSV](#3-api-to-export-filtered-data-in-csv-getcsv)
+- [API 3 - API to export filtered data to CSV](#3-api-to-export-filtered-data-in-csv-getcsv)
   
 ## Installation Instructions
   1. clone the project
@@ -28,7 +28,7 @@ Technologies used:
   5. run the server
   `python manage.py runserver`
    
-## 1. API to trigger Twitter Stream (/twitter/stream)
+## 1. API for Twitter Stream (/twitter/stream)
 This API triggers twitter streaming and stores a curated version of the data returned by Twitter Streaming API. The streaming is done as per the given parameters.
 
 API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
@@ -216,7 +216,7 @@ http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&follow
 
 ```
 
-## 3. API to export filtered data in CSV (/twitter/export)
+## 3. API to export filtered data to CSV (/twitter/export)
 This API returns the data in CSV. If opened in browser, it downloads a CSV file containin the data and if hit using another program, it returns the data in CSV format.
 
 API : `http://127.0.0.1:8000/twitter/export`
