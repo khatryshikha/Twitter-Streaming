@@ -18,7 +18,7 @@ Technologies used:
   
 ## Installation Instructions
   1. clone the project
-  `git clone https://github.com/khatryshikha/InnovaccerHackerCamp.git`
+  `git clone https://github.com/khatryshikha/InnovaccerHackerCamp-19.git`
   2. cd to project folder `cd InnovaccerHackerCamp-19` and create virtual environment
   `virtualenv venv`
   3. activate virtual environment
