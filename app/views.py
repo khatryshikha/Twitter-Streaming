@@ -24,13 +24,12 @@ CONSUMER_SECRET = "RL2En81XXUDF1go4p70IfCFvyxK9qyAPPw4Xt4tOnhkifFJ2nD"
 
 from .api1 import *
 
-# def Merge(dict1, dict2): 
-#     return(dict2.update(dict1)) 
 
 def Merge(x, y):
     z = x.copy()   # start with x's keys and values
     z.update(y)    # modifies z with y's keys and values & returns None
     return z
+
 # API-2 Filtering and soting data 
 @csrf_exempt
 def search_data(request):
@@ -67,8 +66,17 @@ def search_data(request):
 	tweets = db.tweets
 	if (user_name != None and tweet_text != None):
 		print 'both'
-		user_name = user_name.lower()
-		user_info = users.find_one({"screen_name": str(user_name)})
+		typefilter = user_name[0] + user_name[1]
+		user_name = user_name[3:]
+		if typefilter == 'em':
+			user_info = users.find_one({"name_lower": str(user_name)})
+		elif typefilter =='co':
+			user_info = users.find_one({"name_lower":{'$regex':str(user_name)}})
+		elif typefilter == 'sw':
+			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)}})
+		elif typefilter == 'ew':
+			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)+"$"}})
+		
 		if user_info == None:
 			a = [{}]
 			a = json.dumps(a)
@@ -82,7 +90,16 @@ def search_data(request):
 
 	elif (user_name != None):
 		user_name = user_name.lower()
-		user_info = users.find_one({"screen_name": str(user_name)})
+		typefilter = user_name[0] + user_name[1]
+		user_name = user_name[3:]
+		if typefilter == 'em':
+			user_info = users.find_one({"name_lower": str(user_name)})
+		elif typefilter =='co':
+			user_info = users.find_one({"name_lower":{'$regex':str(user_name)}})
+		elif typefilter == 'sw':
+			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)}})
+		elif typefilter == 'ew':
+			user_info = users.find_one({"name_lower":{'$regex': "^"+str(user_name)+"$"}})
 		if user_info == None:
 			a = [{}]
 			a = json.dumps(a)
@@ -116,8 +133,14 @@ def search_data(request):
 		i = 0
 		to_del = []
 		for i in range(len(result)):
-			if result[i]['location'] != location:
+			if  result[i]['location']:
+				res_location = result[i]['location'].lower()
+				if not location in res_location:
+					to_del.append(i)
+			else :
+				res_location = result[i]['location']
 				to_del.append(i)
+			
 		k = 0
 		for i in to_del:
 			print i
@@ -139,7 +162,8 @@ def search_data(request):
 
 	if (retweet_count != None):
 		filter = retweet_count[0] + retweet_count[1]
-		retweet_count = retweet_count[2:]
+		if not str(filter).isdigit():
+			retweet_count = retweet_count[2:]
 		if filter == 'eq':
 			i = 0
 			to_del = []
@@ -180,7 +204,8 @@ def search_data(request):
 	if (follower != None):
 		print 'e'
 		filter = follower[0] + follower[1]
-		follower = follower[2:]
+		if not str(filter).isdigit():
+			follower = follower[2:]
 		if filter == 'eq':
 			i = 0
 			to_del = []
@@ -220,7 +245,8 @@ def search_data(request):
 	if (tweet_favcount != None):
 		print 'e'
 		filter = tweet_favcount[0] + tweet_favcount[1]
-		tweet_favcount = tweet_favcount[2:]
+		if filter.isalpa():
+			tweet_favcount = tweet_favcount[2:]
 		if filter == 'eq':
 			i = 0
 			to_del = []
@@ -287,7 +313,8 @@ def search_data(request):
 		result = sorted(result, key = lambda i: i[sortField], reverse=False)
     
 	settings.RESULT = result
-	result = result[((int(page)-1)*10):((int(page))*10)]
+	if page != None:
+		result = result[((int(page)-1)*10):((int(page))*10)]
 	return JsonResponse(result, safe=False)
 	
 def merge_two_dicts(x, y):
@@ -296,8 +323,8 @@ def merge_two_dicts(x, y):
 	return z
 
 #API3 - CSV export	
-def get_csv_export(results):
-	print settings.RESULT
+def get_csv_export(request):
+	results =  settings.RESULT
 	with open('output.csv', 'wb') as csvfile:
 		spamwriter = csv.writer(csvfile , lineterminator='\n')
 		spamwriter.writerow(['ID', 'USER_NAME', 'TWEET','RETWEET_COUNT','FAVOURITE_COUNT','FOLLOWERS','CREATED_AT','LANGUAGE','LOCATION'])
