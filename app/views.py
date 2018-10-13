@@ -115,8 +115,8 @@ def search_data(request):
                 result.append(k)
 
         elif (tweet_text is not None):
-            all_tweets = tweets.find(
-                {'text_lower': {'$regex': str(tweet_text)}})
+            tweet_text = tweet_text.lower()
+            all_tweets = tweets.find({'text_lower': {'$regex': str(tweet_text)}})
             for i in all_tweets:
                 user_info = users.find_one({'id': i['user']})
                 user_info.pop('_id', None)
@@ -202,7 +202,7 @@ def search_data(request):
 
         if (follower is not None):
             filter = 'eq'
-            if not str(retweet_count[0]).isdigit():
+            if not str(follower[0]).isdigit():
                 filter = follower[0] + follower[1]
                 follower = follower[2:]
             if filter == 'eq':
@@ -280,6 +280,7 @@ def search_data(request):
             res2 = []
             startdate = datetime.strptime(startdate, "%Y-%m-%d")
             enddate = datetime.strptime(enddate, "%Y-%m-%d")
+            enddate = enddate.replace(minute=59, hour=23, second=59)
             for i in result:
                 if (datetime.strptime(i['created_at'],
                                       "%Y-%m-%d %H:%M:%S") >= startdate and datetime.strptime(i['created_at'],
@@ -297,6 +298,8 @@ def search_data(request):
         elif (enddate is not None):
             res2 = []
             enddate = datetime.strptime(enddate, "%Y-%m-%d")
+            enddate = enddate.replace(minute=59, hour=23, second=59)
+            print enddate
             for i in result:
                 if (datetime.strptime(i['created_at'],
                                       "%Y-%m-%d %H:%M:%S") <= enddate):

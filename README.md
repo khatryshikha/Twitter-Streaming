@@ -10,7 +10,7 @@ Technologies used:
   - Twitter Streaming API
   <!-- - MongoDB (Hosted on MLab) -->
   
-## Jump To
+## Move To
 - [Installation Instructions](#installation-instructions)
 - [API 1 - API for Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
 - [API 2 - API to filter/search stored tweets](#2-api-to-filtersearch-stored-tweets-search)
@@ -31,7 +31,7 @@ Technologies used:
 ## 1. API for Twitter Stream (/twitter/stream)
 This API triggers twitter streaming and stores a curated version of the data returned by Twitter Streaming API. The streaming is done as per the given parameters.
 
-API - `http://127.0.0.1:8000/twitter/stream?<keyword>&<count>&<time>`
+API - `http://127.0.0.1:8000/twitter/stream?<keyword><count><time>`
 (methods supported - GET, POST)
 
 - Where `<keyword>` can be any keyword for which streaming needs to be performed.
@@ -103,13 +103,13 @@ Following parameters can be applied:
 
   | Filter | Meaning | Value Format (refer table below) | Example |
   | ------ | ----- | ------ | ----- |
-  | user_name | filter tweets by user_name (case insensitive) | `<textFilterType>-<filterValue>` | name=co-shikha | 
-  | tweet_text | filter tweets by partial/whole from content (case insensitive) | `<filterValue>` | text=India |
+  | user_name | filter tweets by user_name (case insensitive) | `<textFilterType>-<filterValue>` | user_name=co-shikha | 
+  | tweet_text | filter tweets by partial/whole from content (case insensitive) | `<filterValue>` | tweet_text=India |
   | location | location of the user posting the tweet | `<location>` | location=Jaipur |
   | language | Language of tweet | any specific language in [BCP 47](https://tools.ietf.org/html/bcp47) format | language=en |
-  | retweet_count (mostly 0) | retweet count of tweet | `<numFilterType><filterValue>`| retweet_count=eq100 |
+  | retweet_count (mostly 0) | retweet count of tweet | `<numFilterType><filterValue>`| rtcount=eq100 |
   | follower | number of followers of the user | `<numFilterType><filterValue>`| followers=le100 |
-  | tweet_favcount (mostly 0) | favourite count of tweet | `<numFilterType><filterValue>`| tweet_favcount=ge200 |
+  | tweet_favorite_count (mostly 0) | favourite count of tweet | `<numFilterType><filterValue>`| favcount=ge200 |
   | startdate | Tweets posted on or after a specific date | `yyyy-mm-dd` | startdate=2018-10-12 |
   | enddate | Tweets posted on or before a specific date | `yyyy-mm-dd` | enddate=2018-10-14 |
   
@@ -149,6 +149,8 @@ and `<sortField>` can be any field .
   | retweet_count | sort by retweet count | sfield=retweet_count |
   | followers_count | sort by follower count of user | sfield=followers_count |
   | created_at | sort by date | sfield=created_at |
+  | tweet_text | sort by tweet text | sfield=text |
+  | tweet_favorite_count | sort by favourites count | sfield=favorite_count |
   
 ### Page ([page])
 The API is paginated and returns 10 results in one call. The page number can be specified in the API call as `page=[pageNo]` for example `page=5`. Not speciftying the page number takes to page 1.
@@ -217,13 +219,11 @@ http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&follow
 ```
 
 ## 3. API to export filtered data to CSV (/twitter/export)
-This API returns the data in CSV. If opened in browser, it downloads a CSV file containin the data and if hit using another program, it returns the data in CSV format.
+This API exports the data to CSV file. It contains the specific field that filter and sorted in the [Second API](#2-api-to-filtersearch-stored-tweets-search) and there is no `[page]` parameter as all the matching data is returned.
+
 
 API : `http://127.0.0.1:8000/twitter/export`
 (methods supported - GET, POST)
 
-It contains the specific field that filter and sorted in the [Second API](#2-api-to-filtersearch-stored-tweets-search) and there is no `[page]` parameter as all the matching data is returned.
-
 ### API Response
-If the request to the API is sent using a browser, it downloads a CSV file containing data based on filters.
-If the request is sent by another program/ application like Postman etc., the API returns the data in CSV format.
+If the request to the API is sent, it downloads a CSV file containing data based on filters.
