@@ -57,7 +57,7 @@ API - `http://127.0.0.1:8000/twitter/stream?<keyword><count><time>`
   1. Successful response
    ```
   {
-     "status": "success",
+    "status": "success",
     "Message": "Succesfully added twitter data to database",
     "code": "0"
   }
@@ -65,7 +65,7 @@ API - `http://127.0.0.1:8000/twitter/stream?<keyword><count><time>`
 
   2. Failed Response
    ```
-  a) When `<time>` or `<count>` parameters are passed.
+  a) When `<time>` or `<count>` parameters are not passed.
 
 
   {
@@ -95,21 +95,21 @@ API - `http://127.0.0.1:8000/twitter/filter?<filter>[parameters]<sortfield><orde
 (methods supported - GET, POST)
 
 <b>Following are the elements of the api:</b>
-### Filters ([filters])
-Initially this API is used to filter the data by tweet text/user name i.e `<filter>=<user_name>` or `<filter>=<tweet_text>` where these `<filter>` can be filtered by one or more parameters or if `<filter>=<none>` then this API use all data to filter data as mentioned below and `<value>` should be in the specified format.
+### Filters ([filter])
+Initially this API is used to filter the data by tweet text/user name i.e `<filter>=<user_name>` or `<filter>=<tweet_text>` where these `<filter>` can be futher filtered by one or more parameters or if `<filter>=<none>` then this API use all data to filter data as mentioned below and `<value>` should be in the specified format.
   
   
 Following parameters can be applied:
 
   | Filter | Meaning | Value Format (refer table below) | Example |
   | ------ | ----- | ------ | ----- |
-  | user_name | filter tweets by user_name (case insensitive) | `<textFilterType>-<filterValue>` | user_name=co-shikha | 
-  | tweet_text | filter tweets by partial/whole from content (case insensitive) | `<filterValue>` | tweet_text=India |
-  | location | location of the user posting the tweet | `<location>` | location=Jaipur |
+  | user_name | filter tweets by screen_name (case insensitive) | `<textFilterType>-<filterValue>` | user_name=co-shikha | 
+  | tweet_text | filter tweets from tweet content (case insensitive) | `<filterValue>` | tweet_text=Silver |
+  | location | location of the user posting the tweet (case insensitive) | `<location>` | location=Jaipur |
   | language | Language of tweet | any specific language in [BCP 47](https://tools.ietf.org/html/bcp47) format | language=en |
   | retweet_count (mostly 0) | retweet count of tweet | `<numFilterType><filterValue>`| rtcount=eq100 |
   | follower | number of followers of the user | `<numFilterType><filterValue>`| followers=le100 |
-  | tweet_favorite_count (mostly 0) | favourite count of tweet | `<numFilterType><filterValue>`| favcount=ge200 |
+  | tweet_favorite_count (mostly 0) | favourite count of tweet | `<numFilterType><filterValue>`| favcount=ge10 |
   | startdate | Tweets posted on or after a specific date | `yyyy-mm-dd` | startdate=2018-10-12 |
   | enddate | Tweets posted on or before a specific date | `yyyy-mm-dd` | enddate=2018-10-14 |
   
@@ -131,7 +131,7 @@ Following parameters can be applied:
   | le | less than or equal to |
   
 ### Sort ([sort])
-Sorting can be done by any filter, parameter , date of tweet in both ascending and descending order. By default, sorting is done by name of user in ascending order The format of `<order>` & `<sortField>`
+Sorting can be done by any filter, parameter , date of tweet in both ascending and descending order. By default, sorting is done by name of user in ascending order The format of `<order>` & `<sfield(sortField)>`
 
 where  `<order>` can be
 
@@ -140,7 +140,7 @@ where  `<order>` can be
   | asc | Ascending order |
   | dsc | descending order |
   
-and `<sortField>` can be any field .
+and `<sfield>` can be any field .
 
   | sortField | Meaning | Example |
   | ------ | ------ | ------ |
@@ -168,9 +168,9 @@ http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&follow
 ```
 [
   {
-        "text_lower": "rt @rishibagree: madhu koda is serving jail sentence for                     coal scam.\nhis wife geeta koda joins congress in front of                  rahul gandhi who is out…",
+        "text_lower": "rt @rishibagree: madhu koda is serving jail sentence for coal scam.\nhis wife geeta koda joins congress in front of rahul gandhi who is out…",
         "is_quote_status": true,
-        "text": "RT @rishibagree: Madhu koda is serving Jail sentence for Coal                scam.\nHis Wife Geeta Koda joins Congress in front of Rahul                 Gandhi who is out…",
+        "text": "RT @rishibagree: Madhu koda is serving Jail sentence for Coal scam.\nHis Wife Geeta Koda joins Congress in front of Rahul Gandhi who is out…",
         "screen_name_lower": "ankit_das1987",
         "user_mentions": "rishibagree",
         "location_lower": "india",
@@ -191,9 +191,9 @@ http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&follow
         "is_retweet": true
     },
     {
-        "text_lower": "rt @captmrinalc: @manishanataraj @mohua_india @cnbctv18news                 @pmoindia @myogiadityanath if figures r to b believed, n                       don’t see no  reason wh…",
+        "text_lower": "rt @captmrinalc: @manishanataraj @mohua_india @cnbctv18news @pmoindia @myogiadityanath if figures r to b believed, n don’t see no  reason wh…",
         "is_quote_status": false,
-        "text": "RT @CaptMrinalC: @manishanataraj @MoHUA_India @CNBCTV18News                @PMOIndia @myogiadityanath If figures r to b believed, n don’t see          no reason wh…",
+        "text": "RT @CaptMrinalC: @manishanataraj @MoHUA_India @CNBCTV18News @PMOIndia @myogiadityanath If figures r to b believed, n don’t see  no reason wh…",
         "screen_name_lower": "captmrinalc",
         "user_mentions": "myogiadityanath",
         "location_lower": "new delhi",
@@ -219,7 +219,7 @@ http://127.0.0.1:8000/twitter/filter?name=sw-shikha&created_at=2018-10-12&follow
 ```
 
 ## 3. API to export filtered data to CSV (/twitter/export)
-This API exports the data to CSV file. It contains the specific field that filter and sorted in the [Second API](#2-api-to-filtersearch-stored-tweets-search) and there is no `[page]` parameter as all the matching data is returned.
+This API exports the data to CSV file. It contains the specific field that are filtered and sorted in the [Second API](#2-api-to-filtersearch-stored-tweets-search), if no filter applied then all the data will be exported to the CSV file. There is no `[page]` parameter as all the matching data is returned.
 
 
 API : `http://127.0.0.1:8000/twitter/export`
