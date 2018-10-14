@@ -65,16 +65,16 @@ def search_data(request):
             typefilter = user_name[0] + user_name[1]
             user_name = user_name[3:]
             if typefilter == 'em':
-                user_info = users.find_one({"name_lower": str(user_name)})
+                user_info = users.find_one({"screen_name_lower": str(user_name)})
             elif typefilter == 'co':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': str(user_name)}})
+                    {"screen_name_lower": {'$regex': str(user_name)}})
             elif typefilter == 'sw':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': "^" + str(user_name)}})
+                    {"screen_name_lower": {'$regex': "^" + str(user_name)}})
             elif typefilter == 'ew':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': str(user_name) + "$"}})
+                    {"screen_name_lower": {'$regex': str(user_name) + "$"}})
 
             if user_info is None:
                 a = [{}]
@@ -93,16 +93,16 @@ def search_data(request):
             typefilter = user_name[0] + user_name[1]
             user_name = user_name[3:]
             if typefilter == 'em':
-                user_info = users.find_one({"name_lower": str(user_name)})
+                user_info = users.find_one({"screen_name_lower": str(user_name)})
             elif typefilter == 'co':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': str(user_name)}})
+                    {"screen_name_lower": {'$regex': str(user_name)}})
             elif typefilter == 'sw':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': "^" + str(user_name)}})
+                    {"screen_name_lower": {'$regex': "^" + str(user_name)}})
             elif typefilter == 'ew':
                 user_info = users.find_one(
-                    {"name_lower": {'$regex': str(user_name) + "$"}})
+                    {"screen_name_lower": {'$regex': str(user_name) + "$"}})
             if user_info is None:
                 a = [{}]
                 a = json.dumps(a)
@@ -330,6 +330,9 @@ def merge_two_dicts(x, y):
 
 def get_csv_export(request):
     results = settings.RESULT
+    if results == '':
+        search_data(request)
+        results = settings.RESULT
     with open('output.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, lineterminator='\n')
         spamwriter.writerow(['ID',
@@ -342,6 +345,8 @@ def get_csv_export(request):
                              'LANGUAGE',
                              'LOCATION'])
         for i in results:
+            if i['location']:
+                i['location'] =  i['location'].encode("utf-8")
             spamwriter.writerow([long(i['id']),
                                  i['name'].encode("utf-8"),
                                  i['text'].encode("utf-8"),
