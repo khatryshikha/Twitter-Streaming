@@ -10,6 +10,7 @@ This set of APIs has been created to store twitter streaming data and retrieve d
 
 Technologies used:
   - Python/ Django framework
+  - MongoDB
   - Twitter Streaming API
   <!-- - MongoDB (Hosted on MLab) -->
   
