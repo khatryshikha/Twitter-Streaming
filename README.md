@@ -22,8 +22,8 @@ Technologies used:
   
 ## Installation Instructions
   1. clone the project
-  `git clone https://github.com/khatryshikha/InnovaccerHackerCamp-19.git`
-  2. cd to project folder `cd InnovaccerHackerCamp-19` and create virtual environment
+  `git clone https://github.com/khatryshikha/Twitter-Streaming.git`
+  2. cd to project folder `cd Twitter-Streaming` and create virtual environment
   `virtualenv venv`
   3. activate virtual environment
   `source venv/bin/activate`
