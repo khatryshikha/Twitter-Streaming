@@ -1,8 +1,6 @@
 # Twitter Streaming API
 GitHub Repository Link : https://github.com/khatryshikha/Twitter-Streaming
 
-
-
 This set of APIs has been created to store twitter streaming data and retrieve data based on applied filters. It is a set of 3 APIs-
 1. [API for Twitter Stream](#1-api-to-trigger-twitter-stream-stream)
 2. [API to filter/search stored tweets](#2-api-to-filtersearch-stored-tweets-search)
