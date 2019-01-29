@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<h2 align="center">Twitter Streaming</h2>
+<h2 align="center">Stream here</h2>
 <form action="{% url 'stream' %}" method='post'>{% csrf_token %}
     <input class="form-control input-sm" id="keyword" name='keyword' type="text" placeholder="keyword"><br>
     <input class="form-control input-sm" id="time" name='time' type="text" placeholder="time(sec)"><br>
