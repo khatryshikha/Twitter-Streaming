@@ -122,8 +122,24 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MONGO_URI = 'localhost'
-MONGO_PORT = 27017
+# MONGO_URI = 'localhost'
+# MONGO_PORT = 27017
 # MONGO_URI = 'mongodb://shikha12:shikha12@ds159845.mlab.com:59845/hackercamp'
 
 RESULT = ''
+
+if os.environ.get('ENVIRONMENT') == None:
+    MONGO_URL = 'localhost'
+    MONGO_PORT = str(27017)
+    MONGO_URI = "mongodb://" + MONGO_URL + ":" + MONGO_PORT + "/"
+    DEBUG = True
+    SECRET_KEY = 'secret'
+elif os.environ.get('ENVIRONMENT') == 'production':
+    MONGO_USER = os.environ['MONGO_USER']
+    MONGO_PASSWORD = os.environ['MONGO_PASSWORD']
+    MONGO_URL = os.environ['MONGO_URL']
+    MONGO_PORT = os.environ['MONGO_PORT']
+    MONGO_DBNAME = os.environ['MONGO_DBNAME']
+    MONGO_URI = "mongodb://" + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_URL + ":" + MONGO_PORT + "/" + MONGO_DBNAME
+    DEBUG = False
+    SECRET_KEY = os.environ['SECRET_KEY']
