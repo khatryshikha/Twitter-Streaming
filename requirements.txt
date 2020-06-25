@@ -1,4 +1,4 @@
-Django==1.11.28
+Django==1.11.29
 gunicorn==19.9.0
 pymongo==3.7.2
 pytz==2018.5
